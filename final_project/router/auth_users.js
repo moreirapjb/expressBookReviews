@@ -44,8 +44,37 @@ regd_users.post("/login", (req,res) => {
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
   //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  //return res.status(300).json({message: "Yet to be implemented"});
+    const isbn = req.params.isbn;
+    const review = req.query.review;
+    const username = req.session.authorization.username;
+
+    if(books[isbn]) {
+        let book = books[isbn];
+        book.reviews[username] = review;
+        return res.status(200).send("Review added successfully to the book");
+    } else {
+        return res.status(404).json({message: `ERROR! The Book with ISBN ${isbn} was not found`});
+    }
 });
+
+// Deletes a book review
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    const isbn = req.params.isbn;
+    const username = req.session.authorization.username;
+  
+    if (books[isbn]) {
+        let book = books[isbn];
+        if (book.reviews && book.reviews[username]) {
+            delete book.reviews[username];
+            return res.status(200).send("Review deleted successfully from the book");
+        } else {
+            return res.status(404).json({message: "ERROR! There is no review to this book created by to delete"});
+        }
+    } else {
+        return res.status(404).json({message: `ERROR! The Book with ISBN ${isbn} was not found`});
+    }
+  });
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
